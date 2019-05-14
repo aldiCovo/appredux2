@@ -1,0 +1,3 @@
+rootProject.name = 'Jc8AwesomeProject'
+
+include ':app'
