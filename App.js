@@ -1,49 +1,81 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
-
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import {connect} from 'react-redux'
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import PlaceInput from './src/components/PlaceInput/PlaceInput';
+import PlaceList from './src/components/PlaceList/PlaceList';
+import PlaceDetail from './src/components/PlaceDetail/PlaceDetail'
 
-type Props = {};
-export default class App extends Component<Props> {
+import { addPlace, deletePlace, selectPlace, deselectPlace } from './src/store/actions/index'
+
+class App extends Component{
+  state = {
+    places: [],
+    selectedPlace: null
+  }
+
+  placeSubmitHandler = placeName => {
+    if(placeName.trim() === ""){ // "   Alvin    " "Alvin" || "      " ""
+      return // berhenti
+    }
+    this.props.onAddPlace(placeName)
+  }
+
+  placeSelectedHandler = (key) => {
+    this.props.onSelectPlace(key)
+  }
+
+  placeDeletedHandler = () => {
+    this.props.onDeletePlace()
+  }
+
+  modalCloseHandler = () => {
+    this.props.onDeselectPlace()
+  }
+
+
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+        <PlaceDetail
+          modalClosed = {this.modalCloseHandler}
+          onDeletedItem = {this.placeDeletedHandler}
+          selectedPlace = {this.props.selectedPlace}
+        />
+        <PlaceInput onAddPlace = {this.placeSubmitHandler}/>
+        <PlaceList 
+          places = {this.props.places}
+          onItemSelected = {this.placeSelectedHandler}
+        />
       </View>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
+    container: {
+      flex:1,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+      padding: 26
+    }
+})
+
+const mapStateToProps = state => {
+  return {
+    places: state.places.places,
+    selectedPlace: state.places.selectedPlace
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onAddPlace : (name) => dispatch(addPlace(name)),
+    onDeletePlace: () => dispatch(deletePlace()),
+    onSelectPlace: (key) => dispatch(selectPlace(key)),
+    onDeselectPlace: () => dispatch(deselectPlace())
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps )(App)
